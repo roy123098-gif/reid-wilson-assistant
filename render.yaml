@@ -2,6 +2,7 @@ services:
   - type: web
     name: reid-wilson-assistant
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt && python -m py_compile web_app.py advisor_core.py fuzzy_search.py eic/*.py
     startCommand: python web_app.py
     healthCheckPath: /api/health
