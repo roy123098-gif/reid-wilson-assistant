@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08786d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/icon-192.png">
+  <title>Reid &amp; Wilson Tax Help</title>
+  <style>
+    :root {
+      --ink:#172126; --muted:#5d6a70; --line:#d7dfe2; --surface:#ffffff;
+      --soft:#eef5f3; --accent:#08786d; --accent-dark:#075f57; --blue:#246b8e;
+      --warn:#a44d08; --danger:#b42318; --ok:#08783e; --page:#f4f6f5;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--page); font-family:Arial, Helvetica, sans-serif; }
+    button, input, select { font:inherit; }
+    button { min-height:40px; border:1px solid var(--line); border-radius:6px; padding:8px 12px; background:#fff; color:var(--ink); cursor:pointer; }
+    button:hover { border-color:var(--accent); }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline:3px solid rgba(8,120,109,.22); outline-offset:2px; }
+    button:disabled { opacity:.6; cursor:wait; }
+    .primary { color:#fff; background:var(--accent); border-color:var(--accent); }
+    .primary:hover { background:var(--accent-dark); }
+    .topbar { min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:20px; padding:12px 24px; background:#fff; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:11px; min-width:0; }
+    .brand-mark { width:38px; height:38px; display:grid; place-items:center; flex:0 0 auto; border-radius:6px; color:#fff; background:var(--accent); font-size:13px; font-weight:700; }
+    .brand-name { font-size:19px; font-weight:700; }
+    .brand-sub { color:var(--muted); font-size:12px; margin-top:2px; }
+    .top-actions { display:flex; align-items:center; gap:12px; }
+    .mode-control { display:flex; align-items:center; gap:8px; font-size:13px; white-space:nowrap; }
+    .switch { position:relative; width:42px; height:24px; }
+    .switch input { position:absolute; opacity:0; width:1px; height:1px; }
+    .switch span { position:absolute; inset:0; border-radius:999px; background:#c8d0d3; transition:.18s; }
+    .switch span::after { content:""; position:absolute; width:18px; height:18px; top:3px; left:3px; border-radius:50%; background:#fff; transition:.18s; }
+    .switch input:checked + span { background:var(--blue); }
+    .switch input:checked + span::after { transform:translateX(18px); }
+    .nav-band { padding:0 24px; background:#fff; border-bottom:1px solid var(--line); }
+    .tabs { display:flex; gap:22px; max-width:1280px; margin:0 auto; overflow-x:auto; }
+    .tab { min-height:48px; padding:0 2px; border:0; border-bottom:3px solid transparent; border-radius:0; background:transparent; font-weight:700; color:var(--muted); white-space:nowrap; }
+    .tab.active { color:var(--accent-dark); border-bottom-color:var(--accent); }
+    .test-banner { display:none; padding:9px 24px; color:#184f6b; background:#e8f3f8; border-bottom:1px solid #bfd8e5; font-size:13px; }
+    .test-banner.show { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .sample-actions { display:flex; gap:7px; flex-wrap:wrap; }
+    .sample-actions button { min-height:32px; padding:5px 9px; font-size:12px; border-color:#9fc5d8; background:#fff; }
+    .workspace { max-width:1280px; margin:0 auto; min-height:calc(100vh - 122px); }
+    .view { display:none; }
+    .view.active { display:block; }
+    .tax-grid { display:grid; grid-template-columns:320px minmax(0,1fr); min-height:calc(100vh - 122px); }
+    .side-panel { padding:20px; background:#fff; border-right:1px solid var(--line); overflow-y:auto; }
+    .side-panel h2, .budget-form h2 { margin:0 0 5px; font-size:18px; }
+    .small { color:var(--muted); font-size:13px; line-height:1.45; }
+    .section-label { margin:22px 0 10px; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; }
+    .field { margin-bottom:11px; }
+    .field label { display:block; margin:0 0 5px; color:#46545a; font-size:12px; font-weight:700; }
+    .field input, .field select { width:100%; min-height:40px; padding:8px 9px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    details { margin-top:13px; padding-top:11px; border-top:1px solid var(--line); }
+    summary { cursor:pointer; color:#33464e; font-size:13px; font-weight:700; }
+    .profile-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+    .profile-actions .advisory { grid-column:1 / -1; }
+    #profileStatus { min-height:19px; margin-top:9px; }
+    .topic-list { display:grid; gap:7px; }
+    .topic-list button { text-align:left; }
+    .chat-panel { min-width:0; display:grid; grid-template-rows:auto minmax(360px,1fr) auto; max-height:calc(100vh - 122px); background:var(--page); }
+    .chat-heading { padding:18px 22px; background:#fbfcfc; border-bottom:1px solid var(--line); }
+    .chat-heading h1 { margin:0 0 4px; font-size:20px; }
+    .independent { margin-top:7px; color:var(--muted); font-size:12px; }
+    .chat { padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:13px; }
+    .message { max-width:860px; padding:14px; border:1px solid var(--line); border-radius:8px; background:#fff; line-height:1.48; }
+    .message.user { align-self:flex-end; background:var(--soft); border-color:#c9ddda; }
+    .answer-title { margin-bottom:8px; font-weight:700; }
+    .meta { display:flex; flex-wrap:wrap; gap:7px; margin:9px 0; }
+    .pill { display:inline-block; padding:4px 8px; border:1px solid var(--line); border-radius:999px; background:#fff; color:var(--muted); font-size:12px; }
+    .status-potentially_eligible, .confidence-high { color:var(--ok); border-color:#abd7bd; }
+    .status-incomplete, .confidence-medium { color:var(--warn); border-color:#e4c39e; }
+    .status-ineligible, .confidence-low { color:var(--danger); border-color:#efb1ac; }
+    .eic-result { margin:10px 0 14px; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .eic-result h3 { margin:0 0 7px; font-size:15px; }
+    .amount { margin:6px 0; font-size:27px; font-weight:700; }
+    .advisory-result { margin:10px 0 14px; padding:14px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .advisory-result h3 { margin:0 0 8px; font-size:16px; }
+    .tax-breakdown { display:grid; grid-template-columns:1fr auto; gap:7px 16px; margin:13px 0; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .tax-breakdown dt { color:var(--muted); }
+    .tax-breakdown dd { margin:0; font-weight:700; text-align:right; }
+    .check-list { margin:6px 0 10px; padding-left:20px; }
+    .notice { margin-top:9px; padding-left:10px; border-left:4px solid var(--accent); color:var(--muted); font-size:13px; }
+    .notice.error { color:var(--danger); border-left-color:var(--danger); }
+    .composer { display:grid; grid-template-columns:minmax(0,1fr) 56px 76px; gap:8px; padding:13px; background:#fff; border-top:1px solid var(--line); }
+    .composer input { min-width:0; min-height:42px; padding:9px 10px; border:1px solid var(--line); border-radius:6px; }
+    .budget-grid { display:grid; grid-template-columns:380px minmax(0,1fr); min-height:calc(100vh - 122px); background:#fff; }
+    .itin-grid { display:grid; grid-template-columns:320px minmax(0,1fr); min-height:calc(100vh - 122px); background:#fff; }
+    .itin-info { padding:24px; border-right:1px solid var(--line); }
+    .itin-info h2, .itin-work h1 { margin:0 0 7px; }
+    .itin-work { padding:30px; background:var(--page); }
+    .itin-stage { max-width:780px; }
+    .progress-track { height:8px; margin:16px 0 24px; overflow:hidden; border-radius:999px; background:#dfe6e8; }
+    .progress-bar { width:0; height:100%; background:var(--accent); transition:width .2s; }
+    .itin-question { padding:20px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .itin-question h2 { margin:0 0 8px; font-size:21px; }
+    .choice-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:18px; }
+    .choice-list button { min-height:58px; text-align:left; background:#fff; }
+    .choice-list button strong, .choice-list button span { display:block; }
+    .choice-list button span { margin-top:3px; color:var(--muted); font-size:12px; }
+    .itin-safety { margin:18px 0; padding:12px; border-left:4px solid var(--warn); background:#fff8f1; color:#6f3a0c; font-size:13px; }
+    .resource-list { display:grid; gap:8px; margin-top:12px; }
+    .resource-list a { color:var(--accent-dark); font-size:13px; }
+    .result-actions { display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; }
+    .budget-form { padding:24px; border-right:1px solid var(--line); }
+    .budget-fields { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; margin-top:18px; }
+    .budget-fields .income-field { grid-column:1 / -1; }
+    .budget-results { padding:30px; background:var(--page); }
+    .budget-results h2 { margin:0 0 7px; font-size:21px; }
+    .budget-empty { max-width:620px; color:var(--muted); }
+    .budget-summary { display:none; max-width:760px; }
+    .budget-summary.show { display:block; }
+    .budget-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; margin:20px 0; background:var(--line); border:1px solid var(--line); }
+    .metric { min-height:100px; padding:16px; background:#fff; }
+    .metric span { display:block; color:var(--muted); font-size:12px; }
+    .metric strong { display:block; margin-top:7px; font-size:22px; }
+    .goal-shell { min-height:calc(100vh - 122px); padding:26px; background:var(--page); }
+    .goal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:20px; }
+    .goal-header h1 { margin:0 0 5px; font-size:22px; }
+    .goal-layout { display:grid; grid-template-columns:360px minmax(0,1fr); gap:24px; }
+    .goal-form, .vault-panel { padding:20px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .goal-form h2, .vault-panel h2 { margin:0 0 6px; font-size:18px; }
+    .goal-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 10px; margin-top:16px; }
+    .goal-form-grid .wide { grid-column:1 / -1; }
+    .goal-list { display:grid; gap:14px; }
+    .goal-card { padding:18px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .goal-card-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .goal-card h3 { margin:0 0 4px; font-size:18px; }
+    .goal-progress { height:10px; margin:14px 0; overflow:hidden; border-radius:999px; background:#dfe6e8; }
+    .goal-progress span { display:block; height:100%; background:var(--accent); }
+    .goal-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .goal-metrics div { padding:10px; background:var(--soft); }
+    .goal-metrics span { display:block; color:var(--muted); font-size:11px; }
+    .goal-metrics strong { display:block; margin-top:3px; font-size:15px; }
+    .goal-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .goal-actions input { width:150px; min-height:40px; padding:8px; border:1px solid var(--line); border-radius:6px; }
+    .vault-fields { display:grid; gap:10px; margin-top:15px; }
+    .vault-fields input { min-height:42px; padding:9px; border:1px solid var(--line); border-radius:6px; }
+    #installApp[hidden] { display:none; }
+    .footer { display:flex; justify-content:space-between; gap:18px; padding:16px 24px; border-top:1px solid var(--line); background:#fff; color:var(--muted); font-size:12px; }
+    .footer-links { display:flex; gap:14px; flex-wrap:wrap; }
+    .footer a { color:var(--accent-dark); }
+    #donateLink[hidden] { display:none; }
+    @media (max-width:900px) {
+      .tax-grid, .budget-grid, .itin-grid, .goal-layout { grid-template-columns:1fr; }
+      .side-panel, .budget-form, .itin-info { border-right:0; border-bottom:1px solid var(--line); }
+      .chat-panel { max-height:none; min-height:700px; }
+      .chat { min-height:420px; }
+      .budget-results { min-height:420px; }
+    }
+    @media (max-width:620px) {
+      .topbar { align-items:flex-start; padding:12px 14px; }
+      .brand-sub { display:none; }
+      .mode-control > span { display:none; }
+      .nav-band { padding:0 14px; }
+      .tabs { gap:18px; }
+      .test-banner { padding:9px 14px; align-items:flex-start; flex-direction:column; }
+      .side-panel, .budget-form, .budget-results, .itin-info, .itin-work { padding:18px 14px; }
+      .chat-heading, .chat { padding:15px 14px; }
+      .form-row, .budget-fields { grid-template-columns:1fr; }
+      .budget-fields .income-field { grid-column:auto; }
+      .budget-metrics { grid-template-columns:1fr; }
+      .goal-shell { padding:18px 14px; }
+      .goal-header { flex-direction:column; }
+      .goal-form-grid, .goal-metrics { grid-template-columns:1fr; }
+      .goal-form-grid .wide { grid-column:auto; }
+      .choice-list { grid-template-columns:1fr; }
+      .composer { grid-template-columns:minmax(0,1fr) 50px 64px; padding:10px; }
+      .footer { flex-direction:column; padding:14px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">R&amp;W</div>
+      <div><div class="brand-name">Taxpayer Advisory by Mr. Reid</div><div class="brand-sub">Reid &amp; Wilson LLC | Tax and Finance Consulting</div></div>
+    </div>
+    <div class="top-actions">
+      <button id="installApp" type="button" hidden>Install App</button>
+      <div class="mode-control"><span>Test Mode</span><label class="switch" title="Use sample information"><input id="testMode" type="checkbox"><span></span></label></div>
+    </div>
+  </header>
+
+  <div class="nav-band">
+    <nav class="tabs" aria-label="Tools">
+      <button class="tab active" type="button" data-view="taxView">EIC Assistant</button>
+      <button class="tab" type="button" data-view="itinView">ITIN Guide</button>
+      <button class="tab" type="button" data-view="budgetView">Monthly Budget</button>
+      <button class="tab" type="button" data-view="goalsView">Savings Goals</button>
+    </nav>
+  </div>
+
+  <div class="test-banner" id="testBanner">
+    <strong>Test Mode is on. Sample information will not be saved.</strong>
+    <div class="sample-actions"><button type="button" data-sample="family">Working parent</button><button type="button" data-sample="no_children">No children</button><button type="button" data-sample="investment_limit">Investment-income limit</button></div>
+  </div>
+
+  <div class="workspace">
+    <section class="view active" id="taxView">
+      <div class="tax-grid">
+        <aside class="side-panel">
+          <h2>Your 2025 EIC details</h2>
+          <div class="small">Do not enter Social Security numbers, birth dates, addresses, or bank information.</div>
+
+          <div class="section-label">Income and household</div>
+          <div class="field"><label for="filing_status">Filing status</label><select id="filing_status"><option value="">Not selected</option><option value="single">Single</option><option value="hoh">Head of household</option><option value="mfj">Married filing jointly</option><option value="mfs">Married filing separately</option><option value="qss">Qualifying surviving spouse</option></select></div>
+          <div class="form-row">
+            <div class="field"><label for="earned_income">Earned income</label><input id="earned_income" inputmode="decimal" placeholder="$28,000"></div>
+            <div class="field"><label for="agi">AGI</label><input id="agi" inputmode="decimal" placeholder="$28,000"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label for="investment_income">Investment income</label><input id="investment_income" inputmode="decimal" placeholder="$0"></div>
+            <div class="field"><label for="withholding">Federal tax withheld</label><input id="withholding" inputmode="decimal" placeholder="W-2/1099 total"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label for="num_children">Qualifying children</label><input id="num_children" type="number" min="0" max="20" placeholder="0"></div>
+            <div class="field"><label for="taxpayer_age">Your age</label><input id="taxpayer_age" type="number" min="0" max="120" placeholder="If no child"></div>
+          </div>
+          <div class="field"><label for="ssn_valid">Valid work SSN?</label><select id="ssn_valid"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No</option></select></div>
+          <div class="field"><label for="citizen_or_resident_all_year">U.S. citizen or resident alien all year?</label><select id="citizen_or_resident_all_year"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No</option></select></div>
+          <div class="field"><label for="qualifying_children_confirmed">Children pass the EIC relationship, age, residency, and joint-return tests?</label><select id="qualifying_children_confirmed"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No or unsure</option></select></div>
+
+          <details>
+            <summary>Additional eligibility questions</summary>
+            <div class="field"><label for="residency_confirmed">Main home in the U.S. over half the year?</label><select id="residency_confirmed"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="field"><label for="can_be_claimed_as_dependent">Can someone else claim you as a dependent?</label><select id="can_be_claimed_as_dependent"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="field"><label for="is_qualifying_child_of_another">Are you another person's qualifying child?</label><select id="is_qualifying_child_of_another"><option value="">Not confirmed</option><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="field"><label for="separated_spouse">Meet special separated-spouse rules?</label><select id="separated_spouse"><option value="">Not applicable or unknown</option><option value="true">Yes</option><option value="false">No</option></select></div>
+            <div class="form-row">
+              <div class="field"><label for="self_employed">Self-employed?</label><select id="self_employed"><option value="false">No</option><option value="true">Yes</option></select></div>
+              <div class="field"><label for="foreign_earned_income_form">Filing Form 2555?</label><select id="foreign_earned_income_form"><option value="false">No</option><option value="true">Yes</option></select></div>
+            </div>
+          </details>
+
+          <div class="profile-actions"><button id="saveProfile" type="button">Keep for this visit</button><button id="checkEic" type="button">Check EIC</button><button class="primary advisory" id="estimateRefund" type="button">Estimate Tax &amp; Refund</button></div>
+          <div class="small" id="profileStatus"></div>
+
+          <div class="section-label">Browse Publication 596</div>
+          <div class="topic-list" id="topics"></div>
+        </aside>
+
+        <main class="chat-panel">
+          <div class="chat-heading">
+            <h1>Personal tax assistant</h1>
+            <div class="small">Tax year 2025</div>
+            <div class="independent">Independent educational tool. Reid &amp; Wilson is not affiliated with or endorsed by the IRS.</div>
+          </div>
+          <div class="chat" id="chat" aria-live="polite"></div>
+          <form class="composer" id="form">
+            <input id="question" autocomplete="off" placeholder="Ask about EIC or ITIN" aria-label="Tax question">
+            <button type="button" id="voice" title="Voice input">Mic</button>
+            <button class="primary" type="submit">Ask</button>
+          </form>
+        </main>
+      </div>
+    </section>
+
+    <section class="view" id="itinView">
+      <div class="itin-grid">
+        <aside class="itin-info">
+          <h2>ITIN application guide</h2>
+          <div class="small">Build a preparation checklist for Form W-7 without entering identity-document numbers.</div>
+          <div class="itin-safety"><strong>Important:</strong> An ITIN is for federal tax purposes only. It does not authorize work, change immigration status, provide Social Security benefits, or qualify a taxpayer for EIC.</div>
+          <div class="section-label">Official IRS resources</div>
+          <div class="resource-list">
+            <a href="https://www.irs.gov/individuals/individual-taxpayer-identification-number" target="_blank" rel="noopener">ITIN overview</a>
+            <a href="https://www.irs.gov/individuals/how-do-i-apply-for-an-itin" target="_blank" rel="noopener">How to apply</a>
+            <a href="https://www.irs.gov/forms-pubs/about-form-w-7" target="_blank" rel="noopener">Current Form W-7</a>
+            <a href="https://www.irs.gov/individuals/international-taxpayers/acceptance-agent-program" target="_blank" rel="noopener">Acceptance Agent program</a>
+          </div>
+          <div class="section-label">Never enter here</div>
+          <div class="small">ITIN or SSN numbers, passport numbers, visa numbers, birth dates, addresses, photos, or copies of identity documents.</div>
+        </aside>
+        <main class="itin-work">
+          <div class="itin-stage">
+            <h1>Form W-7 preparation assistant</h1>
+            <div class="small">Educational checklist only. This service does not complete, authenticate, mail, or file Form W-7.</div>
+            <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="itinProgress"></div></div>
+            <div id="itinContent" aria-live="polite">
+              <div class="itin-question"><h2>Start an ITIN checklist</h2><p>Answer six short questions using general choices only.</p><button class="primary" id="startItin" type="button">Start ITIN Guide</button></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </section>
+
+    <section class="view" id="budgetView">
+      <div class="budget-grid">
+        <form class="budget-form" id="budgetForm">
+          <h2>Monthly budget</h2>
+          <div class="small">Use monthly take-home amounts. This worksheet is separate from your tax estimate.</div>
+          <div class="budget-fields">
+            <div class="field income-field"><label for="monthly_income">Monthly take-home income</label><input id="monthly_income" inputmode="decimal" placeholder="$3,500" required></div>
+            <div class="field"><label for="housing">Housing</label><input id="housing" inputmode="decimal" placeholder="$1,200"></div>
+            <div class="field"><label for="utilities">Utilities</label><input id="utilities" inputmode="decimal" placeholder="$250"></div>
+            <div class="field"><label for="food">Food</label><input id="food" inputmode="decimal" placeholder="$500"></div>
+            <div class="field"><label for="transportation">Transportation</label><input id="transportation" inputmode="decimal" placeholder="$350"></div>
+            <div class="field"><label for="insurance">Insurance</label><input id="insurance" inputmode="decimal" placeholder="$250"></div>
+            <div class="field"><label for="childcare">Childcare</label><input id="childcare" inputmode="decimal" placeholder="$0"></div>
+            <div class="field"><label for="debt">Debt payments</label><input id="debt" inputmode="decimal" placeholder="$200"></div>
+            <div class="field"><label for="other">Other spending</label><input id="other" inputmode="decimal" placeholder="$300"></div>
+            <div class="field"><label for="savings">Savings goal</label><input id="savings" inputmode="decimal" placeholder="$250"></div>
+          </div>
+          <button class="primary" type="submit">Review Budget</button>
+        </form>
+        <section class="budget-results" aria-live="polite">
+          <div class="budget-empty" id="budgetEmpty"><h2>Budget summary</h2><p>Enter monthly amounts to see what remains after spending and your savings goal.</p></div>
+          <div class="budget-summary" id="budgetSummary"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="goalsView">
+      <div class="goal-shell">
+        <div class="goal-header">
+          <div><h1>Goal-based money plan</h1><div class="small">Turn a car, vacation, home, or emergency goal into monthly steps you can review and update.</div></div>
+          <div class="small" id="goalStreak">Start with one realistic goal.</div>
+        </div>
+
+        <div class="vault-panel" id="vaultPanel">
+          <h2>Private goal vault</h2>
+          <div class="small">Your goals are encrypted on this device with your PIN. The PIN is never stored or sent to Reid &amp; Wilson. A forgotten PIN cannot be recovered.</div>
+          <div class="vault-fields">
+            <input id="vaultPin" type="password" inputmode="numeric" minlength="6" autocomplete="new-password" placeholder="Create or enter a 6+ digit PIN" aria-label="Goal vault PIN">
+            <input id="vaultPinConfirm" type="password" inputmode="numeric" minlength="6" autocomplete="new-password" placeholder="Confirm new PIN" aria-label="Confirm goal vault PIN">
+            <div class="result-actions"><button class="primary" id="vaultOpen" type="button">Create Vault</button><button id="vaultReset" type="button" hidden>Reset Vault</button></div>
+            <div class="small" id="vaultStatus"></div>
+          </div>
+        </div>
+
+        <div class="goal-layout" id="goalWorkspace" hidden>
+          <form class="goal-form" id="goalForm">
+            <h2>Create a savings goal</h2>
+            <div class="small">Use amounts you can verify. The planner does not assume interest or investment returns.</div>
+            <div class="goal-form-grid">
+              <div class="field wide"><label for="goal_type">Goal type</label><select id="goal_type"><option value="car">Car</option><option value="vacation">Vacation</option><option value="home">Home</option><option value="emergency">Emergency fund</option><option value="custom">Other goal</option></select></div>
+              <div class="field wide"><label for="goal_name">Goal name</label><input id="goal_name" required placeholder="Reliable family car"></div>
+              <div class="field"><label for="target_amount">Target amount</label><input id="target_amount" required inputmode="decimal" placeholder="$8,000"></div>
+              <div class="field"><label for="saved_amount">Already saved</label><input id="saved_amount" inputmode="decimal" placeholder="$1,000"></div>
+              <div class="field"><label for="target_date">Target date</label><input id="target_date" type="date" required></div>
+              <div class="field"><label for="monthly_contribution">Monthly contribution</label><input id="monthly_contribution" required inputmode="decimal" placeholder="$350"></div>
+              <div class="field"><label for="goal_monthly_income">Monthly take-home income</label><input id="goal_monthly_income" required inputmode="decimal" placeholder="$3,500"></div>
+              <div class="field"><label for="goal_monthly_expenses">Monthly expenses</label><input id="goal_monthly_expenses" required inputmode="decimal" placeholder="$2,800"></div>
+              <div class="field wide"><label><input id="emergency_fund_confirmed" type="checkbox"> I have considered emergency savings before this purchase goal</label></div>
+            </div>
+            <div class="result-actions"><button class="primary" type="submit">Build Goal Plan</button><button id="useBudget" type="button">Use Budget Amounts</button></div>
+            <div class="small" id="goalFormStatus"></div>
+          </form>
+          <section>
+            <div class="goal-list" id="goalList" aria-live="polite"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <span>Educational tools only. This site does not prepare or file a tax return or Form W-7.</span>
+    <div class="footer-links"><a href="/privacy" target="_blank" rel="noopener">Privacy</a><a href="/terms" target="_blank" rel="noopener">Terms</a><a href="https://www.reidandwilson.com/contact" target="_blank" rel="noopener">Contact</a><a id="donateLink" href="#" target="_blank" rel="noopener" hidden>Support this free tool</a></div>
+  </footer>
+
+  <script>
+    const profileFields=['filing_status','earned_income','agi','investment_income','withholding','num_children','taxpayer_age','ssn_valid','citizen_or_resident_all_year','qualifying_children_confirmed','residency_confirmed','can_be_claimed_as_dependent','is_qualifying_child_of_another','separated_spouse','self_employed','foreign_earned_income_form'];
+    const booleanFields=new Set(['ssn_valid','citizen_or_resident_all_year','qualifying_children_confirmed','residency_confirmed','can_be_claimed_as_dependent','is_qualifying_child_of_another','separated_spouse','self_employed','foreign_earned_income_form']);
+    const budgetFields=['monthly_income','housing','utilities','food','transportation','insurance','childcare','debt','other','savings'];
+    const state={context:null,testMode:false,publicMode:false,samples:{},itinSession:null,lastBudget:null,goalKey:null,goalVault:{goals:[],checkins:[]},installPrompt:null};
+    const GOAL_VAULT_KEY='rw_goal_vault_v1';
+    const chat=document.querySelector('#chat');
+    const question=document.querySelector('#question');
+
+    function esc(value){return String(value??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+    function money(value){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(value||0));}
+    function addMessage(html,kind='assistant'){const item=document.createElement('div');item.className=`message ${kind}`;item.innerHTML=html;chat.appendChild(item);chat.scrollTop=chat.scrollHeight;return item;}
+    function selectValue(value){if(value===null||value===undefined||value==='')return null;return value===true||value==='true';}
+    function profilePayload(){const data={tax_year:2025};profileFields.forEach(id=>{const raw=document.querySelector(`#${id}`).value;data[id]=booleanFields.has(id)?selectValue(raw):(raw===''?null:raw);});return data;}
+    function fillProfile(profile){profileFields.forEach(id=>{const field=document.querySelector(`#${id}`);const value=profile?.[id];field.value=booleanFields.has(id)?(value===null||value===undefined?'':String(Boolean(value))):(value??'');});}
+    function list(items){return items?.length?`<ul class="check-list">${items.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:'';}
+    function storeSessionProfile(profile){return profile;}
+    function restoreSessionProfile(){return false;}
+    async function post(url,payload){const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.error||'The request could not be completed.');return data;}
+
+    function bytesToBase64(bytes){let value='';bytes.forEach(byte=>value+=String.fromCharCode(byte));return btoa(value);}
+    function base64ToBytes(value){return Uint8Array.from(atob(value),char=>char.charCodeAt(0));}
+    async function deriveGoalKey(pin,salt){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+    async function saveGoalVault(){
+      if(!state.goalKey)return;
+      const current=JSON.parse(localStorage.getItem(GOAL_VAULT_KEY)||'null');
+      const salt=current?.salt?base64ToBytes(current.salt):crypto.getRandomValues(new Uint8Array(16));
+      const iv=crypto.getRandomValues(new Uint8Array(12));
+      const data=new TextEncoder().encode(JSON.stringify(state.goalVault));
+      const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},state.goalKey,data));
+      localStorage.setItem(GOAL_VAULT_KEY,JSON.stringify({version:1,salt:bytesToBase64(salt),iv:bytesToBase64(iv),ciphertext:bytesToBase64(encrypted)}));
+    }
+    async function openGoalVault(){
+      const pin=document.querySelector('#vaultPin').value;
+      const confirmPin=document.querySelector('#vaultPinConfirm').value;
+      const status=document.querySelector('#vaultStatus');
+      if(pin.length<6){status.textContent='Use at least 6 digits or characters.';return;}
+      const saved=JSON.parse(localStorage.getItem(GOAL_VAULT_KEY)||'null');
+      try{
+        if(saved){
+          const key=await deriveGoalKey(pin,base64ToBytes(saved.salt));
+          const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(saved.iv)},key,base64ToBytes(saved.ciphertext));
+          state.goalKey=key;state.goalVault=JSON.parse(new TextDecoder().decode(decrypted));
+        }else{
+          if(pin!==confirmPin){status.textContent='The two PIN entries do not match.';return;}
+          const salt=crypto.getRandomValues(new Uint8Array(16));state.goalKey=await deriveGoalKey(pin,salt);state.goalVault={goals:[],checkins:[]};
+          const iv=crypto.getRandomValues(new Uint8Array(12));const data=new TextEncoder().encode(JSON.stringify(state.goalVault));const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},state.goalKey,data));
+          localStorage.setItem(GOAL_VAULT_KEY,JSON.stringify({version:1,salt:bytesToBase64(salt),iv:bytesToBase64(iv),ciphertext:bytesToBase64(encrypted)}));
+        }
+        document.querySelector('#vaultPanel').hidden=true;document.querySelector('#goalWorkspace').hidden=false;renderGoals();
+      }catch(error){status.textContent='That PIN could not unlock this vault. Try again.';}
+    }
+    function resetGoalVault(){if(!confirm('Resetting permanently removes all saved goals and check-ins on this device. Continue?'))return;localStorage.removeItem(GOAL_VAULT_KEY);state.goalKey=null;state.goalVault={goals:[],checkins:[]};location.reload();}
+    function goalStatusLabel(status){return ({complete:'Complete',on_track:'On track',contribution_needed:'Increase monthly savings',needs_adjustment:'Adjust the plan',cash_flow_gap:'Budget gap'})[status]||status;}
+    function goalPill(status){return status==='complete'||status==='on_track'?'potentially_eligible':status==='cash_flow_gap'?'ineligible':'incomplete';}
+    function computeStreak(){const unique=[...new Set(state.goalVault.checkins||[])].sort().reverse();if(!unique.length)return 0;let cursor=new Date();cursor.setHours(0,0,0,0);const today=cursor.toISOString().slice(0,10);if(unique[0]!==today){cursor.setDate(cursor.getDate()-1);if(unique[0]!==cursor.toISOString().slice(0,10))return 0;}let streak=0;for(const date of unique){if(date!==cursor.toISOString().slice(0,10))break;streak++;cursor.setDate(cursor.getDate()-1);}return streak;}
+    function renderGoals(){
+      const listEl=document.querySelector('#goalList');const goals=state.goalVault.goals||[];const streak=computeStreak();
+      document.querySelector('#goalStreak').textContent=streak?`${streak}-day check-in streak`:'Make a quick check-in whenever you review your plan.';
+      if(!goals.length){listEl.innerHTML='<div class="vault-panel"><h2>No goals yet</h2><p class="small">Create one focused goal. You can add money and recalculate the plan as life changes.</p></div>';return;}
+      listEl.innerHTML=goals.map(goal=>{const plan=goal.plan;return `<article class="goal-card" data-goal-id="${esc(goal.id)}"><div class="goal-card-head"><div><h3>${esc(goal.name)}</h3><div class="small">${esc(plan.goal_label)} | Target ${esc(plan.target_date)}</div></div><span class="pill status-${goalPill(plan.status)}">${esc(goalStatusLabel(plan.status))}</span></div><div class="goal-progress"><span style="width:${Math.min(100,Math.max(0,Number(plan.progress_percent)))}%"></span></div><div class="goal-metrics"><div><span>Saved</span><strong>${money(plan.saved_amount)}</strong></div><div><span>Needed monthly</span><strong>${money(plan.required_monthly)}</strong></div><div><span>Projected finish</span><strong>${esc(plan.projected_date||'Needs adjustment')}</strong></div></div><div class="small">${esc(plan.headline)}</div>${list(plan.suggestions)}<div class="goal-actions"><input inputmode="decimal" data-contribution placeholder="Contribution amount" aria-label="Contribution amount"><button type="button" data-add>+ Add</button><button type="button" data-checkin>Check In</button><button type="button" data-remove>Remove</button></div></article>`;}).join('');
+      listEl.querySelectorAll('[data-goal-id]').forEach(card=>{const id=card.dataset.goalId;card.querySelector('[data-add]').addEventListener('click',()=>addGoalContribution(id,card.querySelector('[data-contribution]').value));card.querySelector('[data-checkin]').addEventListener('click',()=>goalCheckin());card.querySelector('[data-remove]').addEventListener('click',()=>removeGoal(id));});
+    }
+    async function replanStoredGoal(goal){const payload={...goal.input,saved_amount:goal.plan.saved_amount};const data=await post('/api/goals/plan',payload);goal.input=payload;goal.plan=data.goal;}
+    async function addGoalContribution(id,value){const amount=Number(String(value).replace(/[$,]/g,''));if(!Number.isFinite(amount)||amount<=0){document.querySelector('#goalFormStatus').textContent='Enter a contribution greater than $0.';return;}const goal=state.goalVault.goals.find(item=>item.id===id);goal.plan.saved_amount=Number(goal.plan.saved_amount)+amount;await replanStoredGoal(goal);await saveGoalVault();renderGoals();}
+    async function goalCheckin(){const today=new Date().toISOString().slice(0,10);state.goalVault.checkins=state.goalVault.checkins||[];if(!state.goalVault.checkins.includes(today))state.goalVault.checkins.push(today);await saveGoalVault();renderGoals();}
+    async function removeGoal(id){if(!confirm('Remove this saved goal?'))return;state.goalVault.goals=state.goalVault.goals.filter(item=>item.id!==id);await saveGoalVault();renderGoals();}
+    function goalPayload(){return {goal_type:document.querySelector('#goal_type').value,name:document.querySelector('#goal_name').value,target_amount:document.querySelector('#target_amount').value,saved_amount:document.querySelector('#saved_amount').value,target_date:document.querySelector('#target_date').value,monthly_contribution:document.querySelector('#monthly_contribution').value,monthly_income:document.querySelector('#goal_monthly_income').value,monthly_expenses:document.querySelector('#goal_monthly_expenses').value,emergency_fund_confirmed:document.querySelector('#emergency_fund_confirmed').checked};}
+
+    function renderEic(eic){
+      const eligibility=eic.eligibility,estimate=eic.estimate,explanation=eic.explanation;
+      const amount=estimate.amount===null||estimate.amount===undefined?'':`<div class="amount">${esc(explanation.amount_text)}</div>`;
+      const blockers=eligibility.blockers.length?`<strong>Eligibility blockers</strong>${list(eligibility.blockers)}`:'';
+      const missing=eligibility.missing.length?`<strong>Still needed</strong>${list(eligibility.missing)}`:'';
+      const warnings=eligibility.warnings.length?`<strong>Important notes</strong>${list(eligibility.warnings)}`:'';
+      const label=eligibility.status.replaceAll('_',' ');
+      return `<section class="eic-result"><h3>2025 EIC result</h3><span class="pill status-${esc(eligibility.status)}">${esc(label)}</span>${amount}<div>${esc(explanation.headline)}</div>${blockers}${missing}${warnings}<div class="small">${esc(estimate.note)}</div></section>`;
+    }
+
+    function renderTaxAdvisory(advisory){
+      const estimate=advisory.estimate;
+      if(!estimate.available){return `<section class="advisory-result"><h3>${esc(advisory.brand)}</h3><div class="answer-title">${esc(advisory.headline)}</div><strong>Still needed</strong>${list(estimate.missing)}<div class="notice">${esc(estimate.disclaimer)}</div></section>`;}
+      const resultAmount=estimate.refund_estimate>0?`Estimated refund: ${money(estimate.refund_estimate)}`:estimate.balance_due>0?`Estimated balance due: ${money(estimate.balance_due)}`:'No estimated refund or balance due';
+      return `<section class="advisory-result"><h3>${esc(advisory.brand)}</h3><span class="pill status-incomplete">${esc(estimate.reliability)} estimate</span><div class="amount">${esc(resultAmount)}</div><dl class="tax-breakdown"><dt>AGI used</dt><dd>${money(estimate.agi)}</dd><dt>2025 standard deduction</dt><dd>${money(estimate.standard_deduction)}</dd><dt>Estimated taxable income</dt><dd>${money(estimate.taxable_income)}</dd><dt>Estimated ordinary income tax</dt><dd>${money(estimate.federal_income_tax)}</dd><dt>Federal withholding</dt><dd>${money(estimate.withholding)}</dd><dt>EIC included</dt><dd>${money(estimate.eic_amount)}</dd></dl><strong>Important limits</strong>${list(estimate.warnings)}<div class="notice">${esc(estimate.disclaimer)}</div></section>`;
+    }
+
+    function renderAnswer(data){
+      if(data.mode==='itin_eic'){
+        const item=addMessage(`<div class="answer-title">${esc(data.answer)}</div>${list(data.details)}<div class="notice">${esc(data.disclaimer)}</div><div class="result-actions"><button type="button" data-open-itin>Open ITIN Guide</button></div>`);
+        item.querySelector('[data-open-itin]')?.addEventListener('click',()=>{showView('itinView');startItin();});
+        return;
+      }
+      if(data.mode==='itin'){
+        addMessage(`<div class="answer-title">${esc(data.answer)}</div><div class="notice">An ITIN does not qualify a taxpayer for EIC.</div>`);
+        showView('itinView');renderItin(data.itin);return;
+      }
+      if(data.mode==='goal'){
+        addMessage(`<div class="answer-title">${esc(data.answer)}</div><div class="notice">Goal details stay encrypted on this device after you create a PIN.</div>`);
+        showView('goalsView');document.querySelector('#goal_type').value=data.goal_type||'custom';return;
+      }
+      state.context=data.context;
+      if(data.profile){fillProfile(data.profile);storeSessionProfile(data.profile);}
+      const messages=data.profile_messages?.length?`<div class="small">${esc(data.profile_messages.join(' '))}</div>`:'';
+      const clarify=data.clarifying_question?`<div class="notice">${esc(data.clarifying_question)}</div>`:'';
+      addMessage(`${messages}${data.tax_advisory?renderTaxAdvisory(data.tax_advisory):''}${data.eic?renderEic(data.eic):''}<div class="answer-title">${esc(data.answer||'I found a related section.')}</div><div><strong>Publication section:</strong> ${esc(data.section)}</div><div class="meta"><span class="pill confidence-${esc(data.confidence.toLowerCase())}">Match confidence: ${esc(data.confidence)}</span></div><div class="small">${esc(data.why)}</div>${clarify}<div class="notice">${esc(data.disclaimer)}</div>`);
+    }
+
+    async function ask(text){
+      if(!text.trim())return;
+      addMessage(esc(text),'user');question.value='';
+      try{renderAnswer(await post('/api/ask',{query:text,context:state.context,profile:profilePayload(),test_mode:state.testMode}));}
+      catch(error){addMessage(`<div class="notice error">${esc(error.message)}</div>`);}
+    }
+
+    async function saveOrCheck(check){
+      const status=document.querySelector('#profileStatus');status.textContent=check?'Checking...':'Keeping details...';
+      try{
+        const data=await post(check?'/api/eic':'/api/profile',{profile:profilePayload(),test_mode:state.testMode});
+        fillProfile(data.profile);storeSessionProfile(data.profile);
+        status.textContent=data.session_only||state.publicMode||state.testMode?'Kept for this browser visit.':'Profile saved on this computer.';
+        if(check)addMessage(renderEic(data.eic));
+      }catch(error){status.textContent=error.message;}
+    }
+
+    async function estimateRefund(){
+      const status=document.querySelector('#profileStatus');status.textContent='Building limited estimate...';
+      try{const data=await post('/api/advisory',{profile:profilePayload(),test_mode:state.testMode});fillProfile(data.profile);storeSessionProfile(data.profile);status.textContent='Estimate ready. Review every limitation shown.';addMessage(renderTaxAdvisory(data.tax_advisory));}
+      catch(error){status.textContent=error.message;}
+    }
+
+    function loadSample(name){const sample=state.samples[name];if(!sample)return;fillProfile(sample);state.context=null;document.querySelector('#profileStatus').textContent='Sample loaded. Nothing will be saved.';addMessage(`Sample loaded: ${esc(name.replaceAll('_',' '))}. Choose Check EIC or ask a question.`);}
+
+    function showView(viewId){document.querySelectorAll('.tab').forEach(item=>item.classList.toggle('active',item.dataset.view===viewId));document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.id===viewId));}
+
+    function itinLinks(links){
+      if(!links)return'';
+      const labels={overview:'IRS ITIN overview',apply:'How to apply',form_w7:'Current Form W-7',acceptance_agents:'Acceptance Agents',tac:'IRS appointment help'};
+      return `<div class="resource-list">${Object.entries(links).map(([key,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(labels[key]||key)}</a>`).join('')}</div>`;
+    }
+
+    function renderItin(itin){
+      state.itinSession=itin.session||null;
+      document.querySelector('#itinProgress').style.width=`${itin.complete?100:(itin.progress||0)}%`;
+      const content=document.querySelector('#itinContent');
+      if(itin.complete){
+        const processing=itin.processing_time?`<p><strong>Timing:</strong> ${esc(itin.processing_time)}</p>`:'';
+        content.innerHTML=`<div class="itin-question"><span class="pill ${itin.status==='ssn_path'?'status-incomplete':'status-potentially_eligible'}">${esc(itin.status.replaceAll('_',' '))}</span><h2>${esc(itin.headline)}</h2><p>${esc(itin.summary)}</p><h3>Your next-step checklist</h3>${list(itin.checklist)}${processing}<h3>Important limits</h3>${list(itin.warnings)}<h3>Official IRS links</h3>${itinLinks(itin.links)}<div class="result-actions"><button class="primary" type="button" id="restartItin">Start Over</button></div></div>`;
+        document.querySelector('#restartItin').addEventListener('click',startItin);return;
+      }
+      const q=itin.question;
+      const error=itin.error?`<div class="notice error">${esc(itin.error)}</div>`:'';
+      content.innerHTML=`<div class="small">Question ${itin.step_number} of ${itin.total_steps}</div><div class="itin-question"><h2>${esc(q.title)}</h2><p>${esc(q.help)}</p>${error}<div class="choice-list">${q.choices.map(choice=>`<button type="button" data-itin-answer="${esc(choice.value)}"><strong>${esc(choice.label)}</strong>${choice.description?`<span>${esc(choice.description)}</span>`:''}</button>`).join('')}</div></div><div class="notice">${esc(itin.eic_notice)}</div>`;
+      content.querySelectorAll('[data-itin-answer]').forEach(button=>button.addEventListener('click',()=>continueItin(button.dataset.itinAnswer)));
+    }
+
+    async function startItin(){try{const data=await post('/api/itin/start',{});renderItin(data.itin);}catch(error){document.querySelector('#itinContent').innerHTML=`<div class="notice error">${esc(error.message)}</div>`;}}
+    async function continueItin(answer){try{const data=await post('/api/itin/step',{session:state.itinSession,answer});renderItin(data.itin);}catch(error){document.querySelector('#itinContent').innerHTML=`<div class="notice error">${esc(error.message)}</div>`;}}
+
+    function setTestMode(enabled){
+      state.testMode=enabled;document.querySelector('#testBanner').classList.toggle('show',enabled);state.context=null;chat.innerHTML='';
+      if(enabled){loadSample('family');}
+      else{restoreSessionProfile()||fetch('/api/profile').then(r=>r.json()).then(data=>fillProfile(data.profile));addMessage('Test Mode is off. Enter only non-sensitive details needed for an estimate.');}
+    }
+
+    function renderBudget(data){
+      const budget=data.budget;state.lastBudget=budget;document.querySelector('#budgetEmpty').hidden=true;
+      const summary=document.querySelector('#budgetSummary');summary.classList.add('show');
+      summary.innerHTML=`<h2>${esc(budget.headline)}</h2><span class="pill status-${budget.status==='on_track'?'potentially_eligible':budget.status==='over_budget'?'ineligible':'incomplete'}">${esc(budget.status.replaceAll('_',' '))}</span><div class="budget-metrics"><div class="metric"><span>Monthly spending</span><strong>${money(budget.total_spending)}</strong></div><div class="metric"><span>Available after spending</span><strong>${money(budget.available_after_spending)}</strong></div><div class="metric"><span>After savings goal</span><strong>${money(budget.remaining_after_goal)}</strong></div></div><h3>Things to review</h3>${list(budget.suggestions)}<div class="notice">${esc(budget.disclaimer)}</div>`;
+    }
+
+    document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>showView(tab.dataset.view)));
+    document.querySelector('#form').addEventListener('submit',event=>{event.preventDefault();ask(question.value);});
+    document.querySelector('#saveProfile').addEventListener('click',()=>saveOrCheck(false));
+    document.querySelector('#checkEic').addEventListener('click',()=>saveOrCheck(true));
+    document.querySelector('#estimateRefund').addEventListener('click',estimateRefund);
+    document.querySelector('#testMode').addEventListener('change',event=>setTestMode(event.target.checked));
+    document.querySelector('#startItin').addEventListener('click',startItin);
+    document.querySelectorAll('[data-sample]').forEach(button=>button.addEventListener('click',()=>loadSample(button.dataset.sample)));
+    document.querySelector('#voice').addEventListener('click',()=>{const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SpeechRecognition){addMessage('Voice input is not available in this browser.');return;}const recognition=new SpeechRecognition();recognition.lang='en-US';recognition.onresult=event=>{question.value=event.results[0][0].transcript;ask(question.value);};recognition.start();});
+    document.querySelector('#budgetForm').addEventListener('submit',async event=>{event.preventDefault();const payload={};budgetFields.forEach(id=>payload[id]=document.querySelector(`#${id}`).value);try{renderBudget(await post('/api/budget',payload));}catch(error){document.querySelector('#budgetEmpty').hidden=false;document.querySelector('#budgetEmpty').innerHTML=`<div class="notice error">${esc(error.message)}</div>`;}});
+    document.querySelector('#vaultOpen').addEventListener('click',openGoalVault);
+    document.querySelector('#vaultReset').addEventListener('click',resetGoalVault);
+    document.querySelector('#useBudget').addEventListener('click',()=>{if(!state.lastBudget){document.querySelector('#goalFormStatus').textContent='Review the Monthly Budget first, then return here.';return;}document.querySelector('#goal_monthly_income').value=state.lastBudget.monthly_income;document.querySelector('#goal_monthly_expenses').value=state.lastBudget.total_spending;document.querySelector('#goalFormStatus').textContent='Monthly budget amounts added.';});
+    document.querySelector('#goalForm').addEventListener('submit',async event=>{event.preventDefault();const status=document.querySelector('#goalFormStatus');try{const input=goalPayload();const data=await post('/api/goals/plan',input);state.goalVault.goals.push({id:crypto.randomUUID(),name:data.goal.name,input,plan:data.goal,created_at:new Date().toISOString()});await saveGoalVault();event.target.reset();status.textContent='Goal saved in your encrypted vault.';renderGoals();}catch(error){status.textContent=error.message;}});
+
+    const hasVault=Boolean(localStorage.getItem(GOAL_VAULT_KEY));
+    document.querySelector('#vaultOpen').textContent=hasVault?'Unlock Vault':'Create Vault';
+    document.querySelector('#vaultPinConfirm').hidden=hasVault;
+    document.querySelector('#vaultReset').hidden=!hasVault;
+    window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();state.installPrompt=event;document.querySelector('#installApp').hidden=false;});
+    document.querySelector('#installApp').addEventListener('click',async()=>{if(!state.installPrompt)return;state.installPrompt.prompt();await state.installPrompt.userChoice;state.installPrompt=null;document.querySelector('#installApp').hidden=true;});
+    window.addEventListener('appinstalled',()=>{document.querySelector('#installApp').hidden=true;});
+    if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(()=>{}));
+
+    Promise.all([fetch('/api/config').then(r=>r.json()),fetch('/api/topics').then(r=>r.json()),fetch('/api/test').then(r=>r.json()),fetch('/api/profile').then(r=>r.json())]).then(([config,topicData,testData,profileData])=>{
+      state.publicMode=config.public_mode;state.samples=testData.profiles||{};
+      if(config.donation_url){const link=document.querySelector('#donateLink');link.href=config.donation_url;link.hidden=false;}
+      if(!restoreSessionProfile())fillProfile(profileData.profile);
+      const topics=document.querySelector('#topics');topics.innerHTML=topicData.topics.map(topic=>`<button type="button" data-topic="${esc(topic)}">${esc(topic)}</button>`).join('');topics.querySelectorAll('[data-topic]').forEach(button=>button.addEventListener('click',()=>ask(button.dataset.topic)));
+      document.querySelector('#profileStatus').textContent=state.publicMode?'Details remain only on this page until it closes or refreshes.':'Encrypted local profile loaded.';
+    }).catch(()=>{document.querySelector('#profileStatus').textContent='The assistant could not finish loading.';});
+    addMessage('Ask an EIC question, or enter your details and choose Check EIC.');
+  </script>
+</body>
+</html>

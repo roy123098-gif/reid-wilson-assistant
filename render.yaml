@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: reid-wilson-assistant
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python -m py_compile web_app.py advisor_core.py fuzzy_search.py eic/*.py
+    startCommand: python web_app.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: PUBLIC_MODE
+        value: "1"
+      - key: ANALYTICS_ENABLED
+        value: "0"
+      - key: REQUIRE_HTTPS
+        value: "1"
+      - key: BRAND_NAME
+        value: Reid & Wilson
+      - key: ALLOWED_ORIGINS
+        value: https://reidandwilson.com,https://www.reidandwilson.com
