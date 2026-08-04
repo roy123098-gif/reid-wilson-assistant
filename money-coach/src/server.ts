@@ -89,10 +89,13 @@ function healthPayload() {
 app.get("/health", (_req, res) => res.json(healthPayload()));
 app.get("/api/health", (_req, res) => res.json(healthPayload()));
 app.post("/api/session/register", rateLimit(60_000, 10), registerSessionHandler);
+app.post("/services/session/register", rateLimit(60_000, 10), registerSessionHandler);
 app.use("/api/plaid", plaidRouter);
 app.use("/api/plaid", plaidWebhookRouter);
+app.use("/services/plaid", plaidRouter);
+app.use("/services/plaid", plaidWebhookRouter);
 
-app.delete("/api/session/data", requireSession, async (req, res, next) => {
+const deleteSessionDataHandler: express.RequestHandler = async (req, res, next) => {
   try {
     const userId = req.sessionUserId!;
     const accessToken = await getAccessToken(userId);
@@ -102,7 +105,9 @@ app.delete("/api/session/data", requireSession, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
+app.delete("/api/session/data", requireSession, deleteSessionDataHandler);
+app.delete("/services/session/data", requireSession, deleteSessionDataHandler);
 
 app.use(express.static(publicDir, {
   extensions: ["html"],
@@ -114,6 +119,7 @@ app.use(express.static(publicDir, {
 }));
 app.get("/", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
 app.use("/api", (_req, res) => res.status(404).json({ success: false, code: "NOT_FOUND", message: "API route not found." }));
+app.use("/services", (_req, res) => res.status(404).json({ success: false, code: "NOT_FOUND", message: "Service route not found." }));
 app.get("*", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
