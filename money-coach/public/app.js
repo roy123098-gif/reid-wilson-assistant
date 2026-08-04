@@ -582,7 +582,7 @@ async function restoreData(file) {
 async function ensureSession() {
   let token = localStorage.getItem(SESSION_KEY);
   if (token) return token;
-  const response = await fetch("/api/session/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  const response = await fetch("/services/session/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
   const data = await response.json();
   if (!response.ok || !data.session_token) throw new Error(data.message || "Could not start a secure bank-linking session.");
   token = data.session_token;
@@ -614,12 +614,12 @@ async function connectBank() {
     }
     if (!window.Plaid) throw new Error("The Plaid Sandbox window could not load. Check your connection and try again.");
     announce("Preparing the secure Plaid Sandbox window…");
-    const linkData = await api("/api/plaid/link-token", { method: "POST", body: JSON.stringify({ platform: "web" }) });
+    const linkData = await api("/services/plaid/link-token", { method: "POST", body: JSON.stringify({ platform: "web" }) });
     const handler = window.Plaid.create({
       token: linkData.link_token,
       onSuccess: async (publicToken) => {
         try {
-          await api("/api/plaid/exchange", { method: "POST", body: JSON.stringify({ public_token: publicToken }) });
+          await api("/services/plaid/exchange", { method: "POST", body: JSON.stringify({ public_token: publicToken }) });
           state.bank.connected = true;
           state.bank.environment = "sandbox";
           await syncBank();
@@ -636,7 +636,7 @@ async function connectBank() {
 async function syncBank() {
   try {
     announce("Syncing fictional Sandbox transactions…");
-    const data = await api("/api/plaid/sync", { method: "POST", body: "{}" });
+    const data = await api("/services/plaid/sync", { method: "POST", body: "{}" });
     const existing = new Map(state.transactions.map((item) => [item.id, item]));
     for (const incoming of data.transactions || []) {
       const prior = existing.get(incoming.id);
@@ -660,7 +660,7 @@ async function syncBank() {
 async function disconnectBank() {
   if (!(await confirmAction("Disconnect Sandbox bank?", "This revokes the test connection and removes synced Sandbox transactions from this device. Manual data stays saved.", "Disconnect"))) return;
   try {
-    await api("/api/plaid/disconnect", { method: "POST", body: JSON.stringify({ deleteSyncedData: true }) });
+    await api("/services/plaid/disconnect", { method: "POST", body: JSON.stringify({ deleteSyncedData: true }) });
     state.transactions = state.transactions.filter((item) => item.source !== "plaid");
     state.bank = { connected: false, lastSyncedAt: null, environment: "sandbox" };
     await saveAndRender("Sandbox bank disconnected and test data removed.");
@@ -672,7 +672,7 @@ async function deleteAllData() {
   try {
     const token = localStorage.getItem(SESSION_KEY);
     if (token) {
-      await fetch("/api/session/data", { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      await fetch("/services/session/data", { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     }
   } catch { /* Local deletion must still finish if the server is unavailable. */ }
   await clearState();
