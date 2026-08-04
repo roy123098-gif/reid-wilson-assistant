@@ -134,6 +134,12 @@ initializeStorage()
     app.listen(port, () => safeLogEvent("service_started", { port, storage: storageMode() }));
   })
   .catch((error) => {
-    safeLogEvent("service_start_failed", { error_type: error instanceof Error ? error.name : "UnknownError" });
+    const errorCode = error && typeof error === "object" && "code" in error
+      ? String((error as { code?: unknown }).code || "unknown").slice(0, 64)
+      : "unknown";
+    safeLogEvent("service_start_failed", {
+      error_type: error instanceof Error ? error.name : "UnknownError",
+      error_code: errorCode
+    });
     process.exitCode = 1;
   });
