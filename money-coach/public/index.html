@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b6b61">
+  <meta name="description" content="Reid & Wilson Money Coach helps you track spending, build budgets, set goals, and optionally test secure bank linking in Plaid Sandbox.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <title>Reid &amp; Wilson Money Coach</title>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Skip to main content</a>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">R&amp;W</span>
+      <span><strong>Reid &amp; Wilson</strong><small>Money Coach</small></span>
+    </div>
+    <div class="header-actions">
+      <span class="sandbox-badge" title="Only fictional test-bank information is used">Plaid Sandbox</span>
+      <button class="button primary" data-action="add-transaction">+ Add transaction</button>
+    </div>
+  </header>
+
+  <nav class="main-nav" aria-label="Money Coach sections">
+    <button class="nav-button active" data-view="home" aria-current="page">Home</button>
+    <button class="nav-button" data-view="spending">Spending</button>
+    <button class="nav-button" data-view="budget">Budget</button>
+    <button class="nav-button" data-view="goals">Goals</button>
+    <button class="nav-button" data-view="coach">Coach</button>
+    <button class="nav-button" data-view="trust">Trust Center</button>
+  </nav>
+
+  <main id="mainContent" class="workspace" tabindex="-1">
+    <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+
+    <section id="homeView" class="view active" data-view-panel="home" aria-labelledby="homeTitle">
+      <div class="page-heading">
+        <div><p class="eyebrow">Your money at a glance</p><h1 id="homeTitle">Welcome to Money Coach</h1></div>
+        <p id="savedStateNote" class="save-note">Changes save automatically on this device.</p>
+      </div>
+      <div class="summary-grid" aria-label="Financial summary">
+        <article class="metric-card"><span>This month’s income</span><strong id="homeIncome">$0.00</strong><small>Based on saved transactions</small></article>
+        <article class="metric-card"><span>This month’s spending</span><strong id="homeSpending">$0.00</strong><small>Expenses only</small></article>
+        <article class="metric-card accent"><span>Money remaining</span><strong id="homeRemaining">$0.00</strong><small>Income minus spending</small></article>
+        <article class="metric-card"><span>Goal progress</span><strong id="homeGoalProgress">0%</strong><small id="homeGoalCaption">Add a goal to begin</small></article>
+      </div>
+
+      <div class="two-column">
+        <article class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Quick actions</p><h2>Update your plan</h2></div></div>
+          <div class="quick-grid">
+            <button class="quick-action" data-action="add-transaction"><span aria-hidden="true">＋</span><strong>Add transaction</strong><small>Income or expense</small></button>
+            <button class="quick-action" data-view="budget"><span aria-hidden="true">◎</span><strong>Adjust budget</strong><small>Update monthly limits</small></button>
+            <button class="quick-action" data-action="import-csv"><span aria-hidden="true">⇧</span><strong>Upload CSV</strong><small>Import several transactions</small></button>
+            <button class="quick-action" data-action="connect-bank"><span aria-hidden="true">↔</span><strong>Link test bank</strong><small>Optional Sandbox data</small></button>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Budget pulse</p><h2 id="budgetPulseTitle">Set your monthly budget</h2></div><button class="text-button" data-view="budget">Review</button></div>
+          <div class="progress" aria-hidden="true"><span id="budgetPulseBar"></span></div>
+          <p id="budgetPulseText" class="muted">Add income and category limits to see how you are tracking.</p>
+          <div id="budgetHighlights" class="mini-stats"></div>
+        </article>
+      </div>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p class="eyebrow">Latest activity</p><h2>Recent transactions</h2></div><button class="text-button" data-view="spending">View all</button></div>
+        <div id="recentTransactions" class="transaction-list"></div>
+      </article>
+    </section>
+
+    <section id="spendingView" class="view" data-view-panel="spending" aria-labelledby="spendingTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Manual entry or CSV upload</p><h1 id="spendingTitle">Spending</h1><p>Tap any transaction to make a quick correction.</p></div></div>
+      <div class="toolbar panel">
+        <label class="search-field"><span>Search transactions</span><input id="transactionSearch" type="search" placeholder="Merchant, note, or category"></label>
+        <label><span>Category</span><select id="categoryFilter"><option value="">All categories</option></select></label>
+        <div class="toolbar-actions">
+          <button class="button" data-action="import-csv">Upload CSV</button>
+          <button class="button" data-action="export-csv">Download CSV</button>
+          <button class="button primary" data-action="add-transaction">+ Add</button>
+        </div>
+      </div>
+      <div class="summary-strip"><span><small>Income</small><strong id="spendingIncome">$0.00</strong></span><span><small>Expenses</small><strong id="spendingExpenses">$0.00</strong></span><span><small>Net</small><strong id="spendingNet">$0.00</strong></span><span><small>Entries</small><strong id="spendingCount">0</strong></span></div>
+      <article class="panel table-panel">
+        <div id="allTransactions" class="transaction-list"></div>
+      </article>
+    </section>
+
+    <section id="budgetView" class="view" data-view-panel="budget" aria-labelledby="budgetTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Easy to adjust anytime</p><h1 id="budgetTitle">Monthly budget</h1><p>Enter your take-home income and the most you want to spend in each category. Values save as you change them.</p></div></div>
+      <div class="budget-layout">
+        <form id="budgetForm" class="panel" novalidate>
+          <div class="panel-heading"><div><h2>Your plan</h2><p class="muted">Use whole dollars or cents.</p></div><button type="button" class="text-button" id="resetBudget">Reset</button></div>
+          <label class="money-input prominent"><span>Monthly take-home income</span><span class="input-wrap"><b>$</b><input id="budgetIncome" name="income" type="number" inputmode="decimal" min="0" max="100000000" step="0.01" placeholder="0.00"></span></label>
+          <div id="budgetCategoryFields" class="budget-fields"></div>
+        </form>
+        <div class="stack">
+          <article class="panel"><p class="eyebrow">Plan summary</p><h2 id="budgetSummaryTitle">Ready when you are</h2><div class="summary-grid compact"><div><span>Planned limits</span><strong id="plannedTotal">$0.00</strong></div><div><span>Actual spending</span><strong id="actualTotal">$0.00</strong></div><div><span>Planned remainder</span><strong id="plannedRemaining">$0.00</strong></div></div><p id="budgetSummaryMessage" class="notice">Enter your income and category limits to build your monthly plan.</p></article>
+          <article class="panel"><p class="eyebrow">Category check</p><h2>Actual vs. planned</h2><div id="budgetComparison" class="comparison-list"></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="goalsView" class="view" data-view-panel="goals" aria-labelledby="goalsTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Build progress one step at a time</p><h1 id="goalsTitle">Goals</h1></div><button class="button primary" data-action="add-goal">+ Add goal</button></div>
+      <div id="goalsList" class="goal-grid"></div>
+    </section>
+
+    <section id="coachView" class="view" data-view-panel="coach" aria-labelledby="coachTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Private, practical guidance</p><h1 id="coachTitle">Coach</h1><p>These educational insights are calculated from the information saved on this device.</p></div></div>
+      <div id="coachCards" class="coach-grid"></div>
+      <article class="panel coach-disclaimer"><h2>Keep in mind</h2><p>Money Coach provides educational planning support, not tax, legal, investment, credit, or individualized financial advice. Verify important decisions with a qualified professional.</p></article>
+    </section>
+
+    <section id="trustView" class="view" data-view-panel="trust" aria-labelledby="trustTitle" hidden>
+      <div class="page-heading"><div><p class="eyebrow">You stay in control</p><h1 id="trustTitle">Trust Center</h1><p>Manual tools always work without linking a bank.</p></div></div>
+      <div class="trust-grid">
+        <article class="panel trust-card"><span class="trust-icon" aria-hidden="true">✓</span><h2>Local-first records</h2><p>Your manual transactions, budgets, and goals stay in this browser’s protected app storage and remain through normal website updates.</p></article>
+        <article class="panel trust-card"><span class="trust-icon" aria-hidden="true">⌁</span><h2>Optional bank linking</h2><p>Plaid Sandbox uses fictional test accounts only during closed testing. Reid &amp; Wilson never receives or stores your bank password.</p></article>
+        <article class="panel trust-card"><span class="trust-icon" aria-hidden="true">⌂</span><h2>Secure connection</h2><p>The live service uses HTTPS. Plaid access tokens stay on the server, encrypted at rest, and are never stored in the app or website.</p></article>
+      </div>
+      <div class="two-column">
+        <article class="panel"><p class="eyebrow">Your portable backup</p><h2>Download or restore everything</h2><p class="muted">A Money Coach backup includes manual transactions, budgets, and goals. Store the downloaded file somewhere private.</p><div class="button-row"><button class="button" data-action="backup-data">Download backup</button><button class="button" data-action="restore-data">Restore backup</button></div></article>
+        <article class="panel"><p class="eyebrow">Sandbox bank connection</p><h2 id="bankStatusTitle">No test bank connected</h2><p id="bankStatusText" class="muted">Linking is optional. Manual entry and CSV upload remain fully available.</p><div class="button-row"><button class="button primary" data-action="connect-bank">Link a test bank</button><button id="syncBankButton" class="button" data-action="sync-bank" hidden>Sync</button><button id="disconnectBankButton" class="button danger" data-action="disconnect-bank" hidden>Disconnect</button></div></article>
+      </div>
+      <article class="panel danger-zone"><div><h2>Delete Money Coach data</h2><p>Erase this browser’s records and, if connected, revoke and delete the Sandbox bank connection.</p></div><button class="button danger" data-action="delete-data">Delete my data</button></article>
+      <nav class="legal-links" aria-label="Policies"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/support.html">Support</a><a href="/data-deletion.html">Data deletion</a></nav>
+    </section>
+  </main>
+
+  <dialog id="transactionDialog" class="modal">
+    <form id="transactionForm" method="dialog" novalidate>
+      <div class="modal-heading"><div><p class="eyebrow">Quick update</p><h2 id="transactionDialogTitle">Add transaction</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Close">×</button></div>
+      <input id="transactionId" type="hidden">
+      <fieldset class="type-choice"><legend>Transaction type</legend><label><input type="radio" name="transactionType" value="expense" checked><span>Expense</span></label><label><input type="radio" name="transactionType" value="income"><span>Income</span></label></fieldset>
+      <div class="form-grid">
+        <label><span>Date</span><input id="transactionDate" type="date" required></label>
+        <label><span>Amount</span><span class="input-wrap"><b>$</b><input id="transactionAmount" type="number" inputmode="decimal" min="0.01" max="100000000" step="0.01" placeholder="0.00" required></span></label>
+        <label class="wide"><span>Name or merchant</span><input id="transactionName" type="text" maxlength="80" autocomplete="off" placeholder="Example: Grocery store" required></label>
+        <label><span>Category</span><select id="transactionCategory" required></select></label>
+        <label><span>Note (optional)</span><input id="transactionNote" type="text" maxlength="120" placeholder="Add a helpful detail"></label>
+      </div>
+      <p id="transactionError" class="form-error" role="alert"></p>
+      <div class="modal-actions"><button id="deleteTransactionButton" type="button" class="button danger" hidden>Delete</button><span></span><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button primary">Save transaction</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="goalDialog" class="modal">
+    <form id="goalForm" method="dialog" novalidate>
+      <div class="modal-heading"><div><p class="eyebrow">A goal you can adjust</p><h2 id="goalDialogTitle">Add goal</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Close">×</button></div>
+      <input id="goalId" type="hidden">
+      <div class="form-grid">
+        <label class="wide"><span>Goal name</span><input id="goalName" type="text" maxlength="80" placeholder="Example: Emergency fund" required></label>
+        <label><span>Target amount</span><span class="input-wrap"><b>$</b><input id="goalTarget" type="number" min="1" max="100000000" step="0.01" required></span></label>
+        <label><span>Saved so far</span><span class="input-wrap"><b>$</b><input id="goalSaved" type="number" min="0" max="100000000" step="0.01" value="0" required></span></label>
+        <label class="wide"><span>Target date (optional)</span><input id="goalDate" type="date"></label>
+      </div>
+      <p id="goalError" class="form-error" role="alert"></p>
+      <div class="modal-actions"><button id="deleteGoalButton" type="button" class="button danger" hidden>Delete</button><span></span><button type="button" class="button" data-close-dialog>Cancel</button><button type="submit" class="button primary">Save goal</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" class="modal small-modal">
+    <form method="dialog"><h2 id="confirmTitle">Please confirm</h2><p id="confirmText"></p><div class="modal-actions"><span></span><span></span><button value="cancel" class="button">Cancel</button><button id="confirmAction" value="confirm" class="button danger">Confirm</button></div></form>
+  </dialog>
+
+  <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+  <input id="backupFileInput" type="file" accept=".json,application/json" hidden>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script src="/csv-tools.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
