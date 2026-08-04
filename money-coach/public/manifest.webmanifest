@@ -1,0 +1,15 @@
+{
+  "name": "Reid & Wilson Money Coach",
+  "short_name": "Money Coach",
+  "description": "Local-first spending, budget, goal, and educational money coaching tools.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f7f5",
+  "theme_color": "#0b6b61",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {"src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
