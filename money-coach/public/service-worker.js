@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "rw-money-coach-v2305";
+const CACHE_NAME = "rw-money-coach-v2306";
 const STATIC_FILES = [
   "/",
   "/styles.css",
