@@ -134,12 +134,19 @@ initializeStorage()
     app.listen(port, () => safeLogEvent("service_started", { port, storage: storageMode() }));
   })
   .catch((error) => {
+    let databaseHost = "invalid";
+    try {
+      databaseHost = new URL(process.env.DATABASE_URL || "").hostname || "missing";
+    } catch {
+      // Only the non-secret hostname classification is logged below.
+    }
     const errorCode = error && typeof error === "object" && "code" in error
       ? String((error as { code?: unknown }).code || "unknown").slice(0, 64)
       : "unknown";
     safeLogEvent("service_start_failed", {
       error_type: error instanceof Error ? error.name : "UnknownError",
-      error_code: errorCode
+      error_code: errorCode,
+      database_host: databaseHost
     });
     process.exitCode = 1;
   });
